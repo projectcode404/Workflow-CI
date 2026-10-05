@@ -48,6 +48,8 @@ jobs:
 
       - name: Build Docker image with mlflow build-docker
         working-directory: MLProject
+        env:
+          MLFLOW_ALLOW_FILE_STORE: "true"
         run: |
           pip install --upgrade mlflow
           DOCKERHUB_USER=$(echo "${{ secrets.DOCKERHUB_USERNAME }}" | tr -d '[:space:]')
