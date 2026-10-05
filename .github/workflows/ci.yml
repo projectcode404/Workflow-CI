@@ -49,11 +49,13 @@ jobs:
       - name: Build Docker image with mlflow build-docker
         working-directory: MLProject
         run: |
+          DOCKERHUB_USER=$(echo "${{ secrets.DOCKERHUB_USERNAME }}" | tr -d '[:space:]')
           mlflow models build-docker \
             --model-uri "runs:/${{ steps.find_run.outputs.run_id }}/model" \
-            --name "${{ secrets.DOCKERHUB_USERNAME }}/online-retail-churn:latest" \
+            --name "${DOCKERHUB_USER}/online-retail-churn:latest" \
             --enable-mlserver
 
       - name: Push Docker image to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/online-retail-churn:latest
+          DOCKERHUB_USER=$(echo "${{ secrets.DOCKERHUB_USERNAME }}" | tr -d '[:space:]')
+          docker push ${DOCKERHUB_USER}/online-retail-churn:latest
