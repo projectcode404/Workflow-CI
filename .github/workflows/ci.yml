@@ -1,0 +1,59 @@
+name: ML Workflow CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  train-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install MLflow and dependencies
+        run: |
+          pip install mlflow==2.19.0 scikit-learn pandas numpy
+
+      - name: Run MLflow Project (retrain model)
+        working-directory: MLProject
+        run: |
+          mlflow run . --env-manager=local
+
+      - name: Find latest run artifact path
+        working-directory: MLProject
+        id: find_run
+        run: |
+          RUN_ID=$(ls -t mlruns/*/*/meta.yaml 2>/dev/null | head -n 1 | xargs dirname | xargs dirname | xargs basename)
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Upload training artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-artifacts
+          path: MLProject/mlruns/
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image with mlflow build-docker
+        working-directory: MLProject
+        run: |
+          mlflow models build-docker \
+            --model-uri "runs:/${{ steps.find_run.outputs.run_id }}/model" \
+            --name "${{ secrets.DOCKERHUB_USERNAME }}/online-retail-churn:latest" \
+            --enable-mlserver
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/online-retail-churn:latest

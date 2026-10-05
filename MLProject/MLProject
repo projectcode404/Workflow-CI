@@ -1,0 +1,7 @@
+name: online_retail_churn
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    command: "python modelling.py"
