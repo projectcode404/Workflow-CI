@@ -52,8 +52,7 @@ jobs:
           DOCKERHUB_USER=$(echo "${{ secrets.DOCKERHUB_USERNAME }}" | tr -d '[:space:]')
           mlflow models build-docker \
             --model-uri "runs:/${{ steps.find_run.outputs.run_id }}/model" \
-            --name "${DOCKERHUB_USER}/online-retail-churn:latest" \
-            --enable-mlserver
+            --name "${DOCKERHUB_USER}/online-retail-churn:latest"
 
       - name: Push Docker image to Docker Hub
         run: |
