@@ -25,7 +25,7 @@ jobs:
       - name: Run MLflow Project (retrain model)
         working-directory: MLProject
         run: |
-          mlflow run . --env-manager=local
+          mlflow run . --env-manager=local --experiment-name "Online Retail Churn Prediction - CI"
 
       - name: Find latest run artifact path
         working-directory: MLProject

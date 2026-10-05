@@ -10,8 +10,6 @@ X_test = pd.read_csv('online_retail_preprocessing/X_test.csv')
 y_train = pd.read_csv('online_retail_preprocessing/y_train.csv').squeeze()
 y_test = pd.read_csv('online_retail_preprocessing/y_test.csv').squeeze()
 
-mlflow.set_experiment("Online Retail Churn Prediction - CI")
-
 param_grid = {
     'n_estimators': [50, 100, 200],
     'max_depth': [3, 5, 7, None],
