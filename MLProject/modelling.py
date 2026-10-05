@@ -18,26 +18,26 @@ param_grid = {
     'min_samples_leaf': [1, 5, 10]
 }
 
-with mlflow.start_run(run_name="ci_retrain"):
-    grid_search = GridSearchCV(
-        RandomForestClassifier(random_state=42),
-        param_grid,
-        cv=5,
-        scoring='f1',
-        n_jobs=-1
-    )
-    grid_search.fit(X_train, y_train)
+# Tidak pakai mlflow.start_run() - run sudah otomatis aktif karena dijalankan via `mlflow run`
+grid_search = GridSearchCV(
+    RandomForestClassifier(random_state=42),
+    param_grid,
+    cv=5,
+    scoring='f1',
+    n_jobs=-1
+)
+grid_search.fit(X_train, y_train)
 
-    best_model = grid_search.best_estimator_
-    y_test_pred = best_model.predict(X_test)
-    y_test_proba = best_model.predict_proba(X_test)[:, 1]
+best_model = grid_search.best_estimator_
+y_test_pred = best_model.predict(X_test)
+y_test_proba = best_model.predict_proba(X_test)[:, 1]
 
-    mlflow.log_params(grid_search.best_params_)
-    mlflow.log_metric("test_accuracy", accuracy_score(y_test, y_test_pred))
-    mlflow.log_metric("test_f1", f1_score(y_test, y_test_pred))
-    mlflow.log_metric("test_roc_auc", roc_auc_score(y_test, y_test_proba))
+mlflow.log_params(grid_search.best_params_)
+mlflow.log_metric("test_accuracy", accuracy_score(y_test, y_test_pred))
+mlflow.log_metric("test_f1", f1_score(y_test, y_test_pred))
+mlflow.log_metric("test_roc_auc", roc_auc_score(y_test, y_test_proba))
 
-    mlflow.sklearn.log_model(best_model, "model")
+mlflow.sklearn.log_model(best_model, "model")
 
-    print(f"Best params: {grid_search.best_params_}")
-    print(f"Test Accuracy: {accuracy_score(y_test, y_test_pred):.4f}")
+print(f"Best params: {grid_search.best_params_}")
+print(f"Test Accuracy: {accuracy_score(y_test, y_test_pred):.4f}")
